@@ -1,5 +1,6 @@
 package com.aws.sqs.service;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import software.amazon.awssdk.services.sqs.SqsClient;
 import software.amazon.awssdk.services.sqs.model.*;
@@ -13,8 +14,9 @@ public class SqsService {
 
     private final SqsClient sqsClient;
 
-    private static final String QUEUE_URL =
-            "https://sqs.sa-east-1.amazonaws.com/447197207642/AWS-SQS-CLASS";
+    @Value("${aws.sqs.url}")
+    private String queueUrl;
+
 
     public SqsService(SqsClient sqsClient) {
         this.sqsClient = sqsClient;
@@ -23,7 +25,7 @@ public class SqsService {
     public String sendMessage(String message) {
 
         SendMessageRequest request = SendMessageRequest.builder()
-                .queueUrl(QUEUE_URL)
+                .queueUrl(queueUrl)
                 .messageBody(message)
                 .build();
 
@@ -35,7 +37,7 @@ public class SqsService {
     public List<Map<String, String>> receiveAndProcess() {
 
         ReceiveMessageRequest request = ReceiveMessageRequest.builder()
-                .queueUrl(QUEUE_URL)
+                .queueUrl(queueUrl)
                 .maxNumberOfMessages(10)
                 .waitTimeSeconds(2)
                 .visibilityTimeout(30) // 30s para processar antes de a msg reaparecer
@@ -72,7 +74,7 @@ public class SqsService {
     public List<String> peekMessages() {
 
         ReceiveMessageRequest request = ReceiveMessageRequest.builder()
-                .queueUrl(QUEUE_URL)
+                .queueUrl(queueUrl)
                 .maxNumberOfMessages(10)
                 .waitTimeSeconds(2)
                 .build();
@@ -89,7 +91,7 @@ public class SqsService {
 
     private void deleteMessage(String receiptHandle) {
         DeleteMessageRequest request = DeleteMessageRequest.builder()
-                .queueUrl(QUEUE_URL)
+                .queueUrl(queueUrl)
                 .receiptHandle(receiptHandle)
                 .build();
 
